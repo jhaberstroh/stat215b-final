@@ -1,0 +1,19 @@
+
+# Datasets 
+data/manylabs/CleanedDataset.sav
+data/manylabs/Codebook.xlsx
+data/manylabs/Data released under CC0 license.txt
+data/manylabs/Full_Dataset_De-Identified.sav
+data/manylabs/Tab.delimited.Cleaned.dataset.WITH.variable.labels.dat
+data/manylabs/Tab.delimited.Cleaned.dataset.WITH.variable.values.dat
+data/manylabs/Tab.delimited.Full_Dataset.WITH.variable.labels.dat
+data/manylabs/Tab.delimited.Full_Dataset.WITH.variable.values.dat
+data/osf/RPPdataConverted.csv
+data/osf/RPPdataConverted.dta
+data/osf/RPPdataConverted.rds
+data/osf/RPPdataConverted.sav
+data/osf/RPPdataConverted.tsv
+data/osf/RPPdataConverted.xlsx
+data/osf/convertDataset.R
+data/osf/original_converted_variablenames.rtf
+data/osf/rpp_data.csv
