@@ -1,0 +1,9 @@
+# Many Labs Project
+CleanedDataset.sav                   
+Codebook.xlsx                        
+Data released under CC0 license.txt  
+Full_Dataset_De-Identified.sav       
+Tab.delimited.Cleaned.dataset.WITH.variable.labels.dat
+Tab.delimited.Cleaned.dataset.WITH.variable.values.dat
+Tab.delimited.Full_Dataset.WITH.variable.labels.dat
+Tab.delimited.Full_Dataset.WITH.variable.values.dat
