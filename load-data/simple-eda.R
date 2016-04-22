@@ -73,14 +73,33 @@ pdf(out.loc)
 sprint(sprintf("Creating scatterplot of [%s] comparison in %s...", column.name, 
     out.loc) , 2.5)
 goodrows <- which(MASTER[,paste0(column.name, "O.")] <  .05 )
-qplot(log10(MASTER[goodrows, paste0(column.name, "R.")] / 
-            MASTER[goodrows, paste0(column.name, "O.")]))            +
+qplot(MASTER[goodrows, paste0(column.name, "R.")] / 
+      MASTER[goodrows, paste0(column.name, "O.")])            +
     ylab("Counts")                                                          +
-    scale_x_log10(limits=c(.01, 100)) +
+    scale_x_log10(limits=c(.00001, 10000)) +
     xlab("Replication ratio")                                     +
     ggtitle(paste("Column:", column.name))
 print("Done.")
 dev.off()
+
+out.loc     <- "output/pval_ratio_kde.pdf"
+column.name <- "T_pval_USE.."
+pdf(out.loc)
+sprint(sprintf("Creating scatterplot of [%s] comparison in %s...", column.name, 
+    out.loc) , 2.5)
+goodrows <- which(MASTER[,paste0(column.name, "O.")] <  .05 )
+ratio <- log10(MASTER[goodrows, paste0(column.name, "R.")] / MASTER[goodrows, paste0(column.name, "O.")])
+ratio <- ratio[is.finite(ratio)]
+print(ratio)
+kde <- density( ratio, from = -5, to = 5)
+qplot(kde$x, kde$y)                                         +
+    ylab("likelihood")                                                          +
+    xlim(-5,5) +
+    xlab("replication log p-ratio")                                     +
+    ggtitle(paste("p-value ratio test"))
+print("Done.")
+dev.off()
+
 
 
 column.name <- "T_N.."
