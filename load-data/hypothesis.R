@@ -9,7 +9,7 @@ colnames(p) <- c("sample", "truth", "O","R")
 
 set.seed(90210)
 
-for (i in seq(1,N))
+for (i in seq(1,100))
 {
     p$sample[i] <- i
     if (runif(1) < .4)
@@ -27,10 +27,20 @@ for (i in seq(1,N))
 }
 
 goodvals <- which(p$O < .05)
+
+
+
 out.loc     <- "output/pval_hypothesis_hist.pdf"
 pdf(out.loc)
 qplot(p$R[goodvals] / p$O[goodvals]) +
-    scale_x_log10(limits=c(.01, 100))
+    scale_x_log10(limits=c(.00001, 10000))
+dev.off()
+print(length(which(p$R[goodvals] < .05)) / length(goodvals))
+
+kde <- density( log10(p$R[goodvals] / p$O[goodvals]) , from=-5, to=5)
+out.loc     <- "output/pval_hypothesis_kde.pdf"
+pdf(out.loc)
+qplot(kde$x, kde$y) + xlim(-5, 5)
 dev.off()
 
 
