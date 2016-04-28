@@ -5,8 +5,17 @@ library(devtools)
 library(optparse)
 source_url('https://raw.githubusercontent.com/FredHasselman/toolboxR/master/C-3PR.R')
 
+
 option_list <- list(
-    make_option(c("-s", "--seed"),  action="store", type="integer", default=90210)
+    make_option(c("-s", "--seed"),  action="store", type="integer", default=90210),
+    make_option(c("-S", "--save"),  action="store", default=""),
+    make_option(c("-H", "--hack"),  action="store", type="integer", default=1),
+    make_option(c("-n", "--hacknull"),  action="store", type="integer", default=60),
+    make_option(c("-c", "--cutoff"),  action="store", type="double", default=0.0),
+    make_option(c("-p", "--distexp"),  action="store", type="double", default=1.0),
+    make_option(c("-f", "--nullfrac"),  action="store", type="double", default=0.0),
+    make_option(c("-m", "--effmean"),  action="store", type="double", default=1.0),
+    make_option(c("-w", "--effwidth"),  action="store", type="double", default=1.9)
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
@@ -60,45 +69,44 @@ colnames(p) <- c("sample", "truth", "O","R")
 
 set.seed(opt$seed)
 
-mu.var <- 1.9
-mu.exp.var <- .45
-frac.real <- 0.4
-pval.hack <- 60
-
 for (i in seq(1,N))
 {
     p$sample[i] <- i
     rando <- runif(1)
-    mu.i <- 0
-    if (rando < frac.real)
+    z.mu <- 0
+    if (rando > opt$nullfrac)
     {
-        p$truth <- 1
-        # if the effect is real, it needs to have a
-        # mean greater than the experimental threshhold
-        # of one-sigma
-        while (abs(mu.i) < mu.exp.var/2)
+        z.O <- 0
+        z.R <- 0
+        while ((abs(z.O) < 1.6) | (abs(z.mu) < opt$cutoff))
         {
-            mu.i <- rnorm(1, 0, mu.var)
+            z.mu <- abs(rnorm(1,    opt$effmean, opt$effwidth))**opt$distexp
+            z.O  <- max(rnorm(opt$hack, z.mu, 1.0))
+            z.R  <-            rnorm(1, z.mu, 1.0)
         }
-        mu.O <- rnorm(1, mu.i, mu.exp.var)
-        mu.R <- rnorm(1, mu.i, mu.exp.var)
-        p$O[i] <- 10^(-mu.O^2)
-        p$R[i] <- 10^(-mu.R^2)
+        # Can extend to use p$truth = z.mu > .25 or something like that
+        p$truth <- 1
+        p$O[i] <- 1 - pnorm(abs(z.O))
+        p$R[i] <- 1 - pnorm(abs(z.R))
     }
     else
     {
         p$truth <- 0
-        p$O[i] <- min(runif(pval.hack, max=1.0))
+        p$O[i] <- min(runif(opt$hacknull, max=1.0))
         p$R[i] <- runif(1, max=1.0)
     }
 }
 
 goodvals <- which(p$O < .05)
 goodvals <- goodvals[seq(1,N.select)]
+if (length(goodvals) < N.select)
+{
+    print("Did not get enough good values, killing program")
+    exit()
+}
 
 
-
-out.loc     <- "output/pval_hypothesis_hist.pdf"
+out.loc     <- paste0("output/", opt$save, "pval_hypothesis_hist.pdf")
 pdf(out.loc)
 qplot(p$R[goodvals] / p$O[goodvals]) +
     scale_x_log10(limits=c(.00001, 10000))
@@ -106,7 +114,7 @@ dev.off()
 print(length(which(p$R[goodvals] < .05)) / length(goodvals))
 
 kde <- density( log10(p$R[goodvals] / p$O[goodvals]) , from=-5, to=5)
-out.loc     <- "output/pval_hypothesis_kde.pdf"
+out.loc     <- paste0("output/", opt$save, "pval_hypothesis_kde.pdf")
 pdf(out.loc)
 qplot(kde$x, kde$y) + xlim(-5, 5)
 dev.off()
@@ -118,7 +126,7 @@ p.melt <- melt(p[goodvals,], id.vars=c("sample", "truth"),
 # head(p)
 head(p.melt)
 goodvals <- which(p$O < .05)
-out.loc     <- "output/p-rep_hypothesis_violin.pdf"
+out.loc     <- paste0("output/", opt$save, "p-rep_hypothesis_kde.pdf")
 pdf(out.loc)
 violin_plot.lv2(p.melt)
 dev.off()
